@@ -2,6 +2,56 @@ import pygame
 import numpy as np
 import time
 
+# --- CONFIGURACIÓN DE LA SIMULACIÓN ---
+ANCHO_PANTALLA = 800
+ALTO_PANTALLA = 600
+TAMANO_CELDA = 8  # Tamaño en píxeles de cada celda
+
+# Calcular dimensiones de la matriz de celdas
+COLS = ANCHO_PANTALLA // TAMANO_CELDA
+FILAS = ALTO_PANTALLA // TAMANO_CELDA
+
+# Colores (RGB)
+COLOR_BG = (10, 10, 15) 
+COLOR_REJILLA = (20, 20, 30)
+COLOR_CELDA = (0, 255, 150)
+
+
+def inicializar_tablero():
+    """Crea un tablero aleatorio con ~20% de celdas vivas."""
+    return np.random.choice([0, 1], size=(FILAS, COLS), p=[0.8, 0.2])
+
+
+def actualizar_tablero(tablero):
+    """
+    Calcula la siguiente generación usando operaciones vectoriales de NumPy.
+    Evita los bucles for anidados para optimizar el rendimiento secuencial.
+    """
+    # Matriz para almacenar el nuevo estado
+    nuevo_tablero = np.zeros_like(tablero)
+    
+    # Conteo vectorial de vecinos usando "slicing" (rebanado de matrices)
+    # Se suman los 8 vecinos desplazando la matriz en todas las direcciones
+    vecinos = (
+        tablero[:-2, :-2]  + tablero[:-2, 1:-1] + tablero[:-2, 2:] +
+        tablero[1:-1, :-2]                      + tablero[1:-1, 2:] +
+        tablero[2:, :-2]   + tablero[2:, 1:-1]  + tablero[2:, 2:]
+    )
+    
+    # Aplicamos las reglas de Conway vectorialmente:
+    sub_tablero = tablero[1:-1, 1:-1]
+    
+    # Regla 1 y 2: Supervivencia (celda viva y 2 o 3 vecinos)
+    supervive = (sub_tablero == 1) & ((vecinos == 2) | (vecinos == 3))
+    
+    # Regla 3: Nacimiento (celda muerta y exactamente 3 vecinos)
+    nace = (sub_tablero == 0) & (vecinos == 3)
+    
+    # Asignamos los nuevos estados a la zona interna del nuevo tablero
+    nuevo_tablero[1:-1, 1:-1] = np.where(supervive | nace, 1, 0)
+    
+    return nuevo_tablero
+
 def dibujar(pantalla, tablero):
     """Renderiza el estado actual del tablero en la pantalla."""
     pantalla.fill(COLOR_BG)
