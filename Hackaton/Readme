@@ -1,1 +1,279 @@
+# GeoRisk AI 🌍🚀
+### Procesamiento Paralelo de Imágenes Satelitales para Inteligencia Climática en Tiempo Real
 
+GeoRisk AI es una plataforma de análisis geoespacial diseñada para detectar riesgos climáticos automáticamente utilizando imágenes satelitales Sentinel-2 y procesamiento paralelo de alto rendimiento.
+
+El proyecto fue desarrollado como una solución orientada a:
+- seguros paramétricos,
+- monitoreo ambiental,
+- alertas tempranas,
+- evaluación automática de riesgo climático,
+- y procesamiento masivo de imágenes satelitales.
+
+---
+
+# 🌎 Problema
+
+Actualmente, muchas plataformas geoespaciales procesan imágenes de forma secuencial, lo que genera tiempos extremadamente altos de análisis.
+
+En nuestro caso:
+- un día completo de imágenes podía tardar hasta **14 horas**,
+- y el nuevo requerimiento era procesar aproximadamente **27,000 imágenes diarias**.
+
+Esto genera problemas críticos:
+- alertas tardías,
+- pérdida de confianza,
+- lentitud operativa,
+- y falta de escalabilidad.
+
+GeoRisk AI busca resolver este problema mediante:
+- paralelismo,
+- GPU computing,
+- procesamiento por lotes,
+- y pipelines concurrentes.
+
+---
+
+# 🛰️ ¿Qué hace GeoRisk AI?
+
+La plataforma analiza imágenes Sentinel-2 y calcula índices espectrales para detectar:
+
+| Riesgo | Índice |
+|---|---|
+| Vegetación / Sequía | NDVI |
+| Agua / Inundaciones | NDWI |
+| Expansión urbana | NDBI |
+| Incendios forestales | NBR |
+
+Estos índices permiten generar:
+- mapas de vegetación,
+- detección de inundaciones,
+- monitoreo urbano,
+- análisis de incendios,
+- y alertas tempranas automatizadas.
+
+---
+
+# 📂 Estructura del Proyecto
+
+## `GeoRisk.ipynb`
+Notebook principal del proyecto.
+
+Incluye:
+- procesamiento de imágenes Sentinel-2,
+- cálculo de índices espectrales,
+- pruebas de paralelismo,
+- optimizaciones CPU,
+- benchmarks,
+- y comparativas secuencial vs paralelo.
+
+### Tecnologías usadas
+- `rasterio`
+- `numpy`
+- `numba`
+- `multiprocessing`
+- `ProcessPoolExecutor`
+- `ThreadPoolExecutor`
+
+---
+
+## `GPU.ipynb`
+Versión optimizada usando GPU.
+
+Incluye:
+- procesamiento masivo por batches,
+- aceleración mediante CuPy,
+- lectura paralela,
+- escritura paralela,
+- pipeline concurrente,
+- y optimización de I/O.
+
+### Tecnologías usadas
+- `CuPy`
+- `ThreadPoolExecutor`
+- `NumPy`
+- `rasterio`
+- GPU NVIDIA T4
+
+---
+
+# ⚡ Evolución de la Optimización
+
+## 🔹 Versión 1 — CPU Secuencial
+
+```text
+[leer imagen] → [calcular] → [guardar]
+```
+
+- Todo secuencial
+- CPU tradicional
+- ~50 minutos
+
+---
+
+## 🔹 Versión 2 — GPU + batches
+
+```text
+Hilos leen → GPU procesa → guardar secuencial
+```
+
+- Uso inicial de GPU
+- Procesamiento por lotes
+- ~9.7 minutos
+
+---
+
+## 🔹 Versión 3 — Pipeline Completo
+
+```text
+16 hilos leen
+→ GPU procesa 512 imágenes
+→ 16 hilos guardan
+```
+
+- Lectura paralela
+- Escritura paralela
+- GPU masiva
+- Pipeline continuo
+- ~2-3 minutos
+
+---
+
+# 🧠 Principales Optimizaciones
+
+## 🧵 Paralelismo de I/O
+
+Se utilizó `ThreadPoolExecutor` para:
+- leer imágenes simultáneamente,
+- y guardar resultados en paralelo.
+
+---
+
+## 🎮 GPU Computing
+
+Con `CuPy` se migraron cálculos matemáticos de CPU a GPU.
+
+Esto permitió:
+- procesar batches de 512 imágenes,
+- aprovechar 2,560 núcleos CUDA,
+- y acelerar operaciones matriciales masivas.
+
+---
+
+## ⚙️ Numba JIT
+
+Se utilizaron decoradores:
+
+```python
+@njit(parallel=True)
+```
+
+Para:
+- compilar loops a código máquina,
+- paralelizar cálculos internos,
+- y reducir overhead de Python.
+
+---
+
+# 📊 Resultados
+
+| Métrica | Resultado |
+|---|---|
+| Imágenes procesadas | 27,000 |
+| Errores | 0 |
+| Speedup total | ~20x |
+| Tiempo original | ~50 min |
+| Tiempo optimizado | ~2-3 min |
+
+---
+
+# 🔬 Índices Espectrales
+
+## NDVI — Vegetación
+
+```math
+NDVI = (NIR - Red) / (NIR + Red)
+```
+
+---
+
+## NDWI — Agua
+
+```math
+NDWI = (Green - NIR) / (Green + NIR)
+```
+
+---
+
+## NDBI — Urbanización
+
+```math
+NDBI = (SWIR1 - NIR) / (SWIR1 + NIR)
+```
+
+---
+
+## NBR — Incendios
+
+```math
+NBR = (NIR - SWIR2) / (NIR + SWIR2)
+```
+
+---
+
+# 🛠️ Librerías Principales
+
+| Librería | Uso |
+|---|---|
+| rasterio | Lectura/escritura de imágenes satelitales |
+| NumPy | Operaciones matemáticas |
+| CuPy | Aceleración GPU |
+| Numba | Compilación JIT |
+| multiprocessing | Paralelismo CPU |
+| ThreadPoolExecutor | Paralelismo I/O |
+
+---
+
+# 🚀 Visión Futura
+
+GeoRisk AI puede evolucionar hacia:
+- monitoreo climático global,
+- integración con aseguradoras,
+- análisis de riesgo financiero,
+- IA predictiva,
+- pipelines distribuidos multi-GPU,
+- y alertas climáticas en tiempo real.
+
+La meta final es construir infraestructura capaz de transformar imágenes satelitales en decisiones automáticas de negocio.
+
+---
+
+# ▶️ Cómo Ejecutar
+
+## Requisitos
+
+```bash
+pip install rasterio numpy numba cupy tqdm
+```
+
+---
+
+## Ejecutar notebook principal
+
+```bash
+jupyter notebook GeoRisk.ipynb
+```
+
+---
+
+## Ejecutar versión GPU
+
+```bash
+jupyter notebook GPU.ipynb
+```
+
+---
+
+# 📌 Autor
+
+Proyecto desarrollado para hackathon de optimización computacional y análisis geoespacial utilizando procesamiento paralelo y GPU computing.
