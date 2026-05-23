@@ -1,0 +1,69 @@
+import pygame
+import numpy as np
+import time
+
+def dibujar(pantalla, tablero):
+    """Renderiza el estado actual del tablero en la pantalla."""
+    pantalla.fill(COLOR_BG)
+    
+    # Encontrar los índices donde las celdas están vivas (valor == 1)
+    filas_vivas, cols_vivas = np.where(tablero == 1)
+    
+    # Dibujar cada celda viva como un cuadrado
+    for f, c in zip(filas_vivas, cols_vivas):
+        rectangulo = (c * TAMANO_CELDA, f * TAMANO_CELDA, TAMANO_CELDA - 1, TAMANO_CELDA - 1)
+        pygame.draw.rect(pantalla, COLOR_CELDA, rectangulo)
+
+
+def main():
+    pygame.init()
+    pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
+    pygame.display.set_caption("Juego de la Vida de Conway - Secuencial")
+    
+    tablero = inicializar_tablero()
+    reloj = pygame.time.Clock()
+    ejecutando = True
+    pausado = False
+    
+    print("Controles:")
+    print("  [Espacio] - Pausar / Reanudar")
+    print("  [R]       - Reiniciar tablero")
+    print("  [Esc]     - Salir")
+    
+    while ejecutando:
+        # 1. Gestión de Eventos
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                ejecutando = False
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_ESCAPE:
+                    ejecutando = False
+                elif evento.key == pygame.K_SPACE:
+                    pausado = not pausado
+                    estado = "PAUSADO" if pausado else "EJECUTANDO"
+                    print(f"Estado: {estado}")
+                elif evento.key == pygame.K_r:
+                    tablero = inicializar_tablero()
+                    print("Tablero reiniciado.")
+        
+        # 2. Actualización de la Lógica (Midiendo tiempo)
+        if not pausado:
+            inicio_tiempo = time.perf_counter()
+            tablero = actualizar_tablero(tablero)
+            fin_tiempo = time.perf_counter()
+            
+            # Imprime el tiempo que toma calcular esta generación
+            ms = (fin_tiempo - inicio_tiempo) * 1000
+            pygame.display.set_caption(f"Conway Secuencial | Cómputo Gen: {ms:.2f} ms")
+        
+        # 3. Renderizado
+        dibujar(pantalla, tablero)
+        pygame.display.flip()
+        
+        # Controlar los FPS de la visualización (puedes aumentarlo o quitarlo para pruebas de estrés)
+        reloj.tick(30)
+        
+    pygame.quit()
+
+if _name_ == "_main_":
+    main()
